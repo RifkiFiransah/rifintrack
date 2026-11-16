@@ -80,24 +80,6 @@ docker start rifintrack-pg
 docker exec rifintrack-pg pg_isready -U postgres
 ```
 
-#### Opsi B - PostgreSQL lokal
-
-Buat database `rifintrack`, lalu sesuaikan `.env`:
-
-```env
-DATABASE_URL="postgresql://postgres:PASSWORD@localhost:5432/rifintrack"
-DIRECT_URL="postgresql://postgres:PASSWORD@localhost:5432/rifintrack"
-```
-
-#### Opsi C - Supabase
-
-Supabase memakai dua koneksi: pooler untuk aplikasi dan koneksi langsung untuk migrasi.
-
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@POOLER_HOST:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://USER:PASSWORD@DB_HOST:5432/postgres"
-```
-
 > `DIRECT_URL` wajib diisi karena `prisma/schema.prisma` memakai `directUrl`. Prisma CLI membaca `.env` melalui `prisma.config.ts`.
 
 ### 3. Generate Prisma Client dan jalankan migrasi
@@ -149,21 +131,6 @@ Buka `http://localhost:3000`.
 - Login memakai `SEED_USER_EMAIL` dan `SEED_USER_PASSWORD`, atau
 - Daftar akun baru lewat `/register` (kategori default dibuat otomatis).
 
-## Environment Variables
-
-| Variabel              | Wajib      | Keterangan                                                             |
-| --------------------- | ---------- | ---------------------------------------------------------------------- |
-| `DATABASE_URL`        | Ya         | Koneksi database yang dipakai aplikasi (boleh pooler).                 |
-| `DIRECT_URL`          | Ya         | Koneksi langsung untuk Prisma CLI/migrasi.                             |
-| `NODE_ENV`            | Tidak      | `production` mengaktifkan cookie session `Secure`.                     |
-| `SEED_USER_NAME`      | Untuk seed | Nama user development.                                                 |
-| `SEED_USER_EMAIL`     | Untuk seed | Email user development.                                                |
-| `SEED_USER_PASSWORD`  | Untuk seed | Password user development. Jangan pakai di produksi.                   |
-| `NEXT_PUBLIC_APP_URL` | Tidak      | Disiapkan untuk kebutuhan URL publik; belum dipakai kode saat ini.     |
-| `SESSION_SECRET`      | Tidak      | Disiapkan untuk kebutuhan signing/rotasi; belum dipakai kode saat ini. |
-
-Jangan commit file `.env`. File tersebut sudah ada di `.gitignore`.
-
 ## Scripts
 
 | Perintah              | Fungsi                                         |
@@ -199,43 +166,6 @@ Jangan commit file `.env`. File tersebut sudah ada di `.gitignore`.
 | `/backup`        | Unduh backup JSON dan restore.                                                                |
 | `/more`          | Pintasan modul tambahan di mobile.                                                            |
 | `/profile`       | Profil pengguna, ubah nama/email, dan ganti password.                                         |
-
-## API Ringkas
-
-| Endpoint                                   | Method        | Keterangan                                                     |
-| ------------------------------------------ | ------------- | -------------------------------------------------------------- |
-| `/api/auth/register`                       | POST          | Registrasi + kategori default.                                 |
-| `/api/auth/login`                          | POST          | Login, membuat session cookie.                                 |
-| `/api/auth/logout`                         | POST          | Logout, mencabut session.                                      |
-| `/api/profile`                             | PATCH         | Ubah nama dan email/username.                                  |
-| `/api/profile/password`                    | POST          | Ganti password; mencabut sesi di perangkat lain.               |
-| `/api/accounts`                            | GET, POST     | Daftar/buat rekening.                                          |
-| `/api/accounts/[id]`                       | PATCH         | Ubah/arsipkan rekening.                                        |
-| `/api/categories`                          | GET, POST     | Daftar/buat kategori.                                          |
-| `/api/categories/[id]`                     | PATCH         | Ubah/arsipkan kategori.                                        |
-| `/api/transactions`                        | GET, POST     | Daftar/buat transaksi (mendukung `idempotencyKey`).            |
-| `/api/transactions/[id]`                   | PATCH, DELETE | Ubah transaksi; `DELETE` berarti void.                         |
-| `/api/budgets`                             | GET, POST     | Anggaran per bulan.                                            |
-| `/api/budgets/[id]`                        | PATCH         | Ubah nama/catatan anggaran.                                    |
-| `/api/budgets/[id]/limits`                 | PUT           | Upsert limit kategori.                                         |
-| `/api/budgets/[id]/limits/[categoryId]`    | DELETE        | Hapus limit kategori.                                          |
-| `/api/budgets/copy`                        | POST          | Salin limit dari periode lain.                                 |
-| `/api/savings`                             | GET, POST     | Daftar/buat tujuan tabungan.                                   |
-| `/api/savings/[id]`                        | PATCH         | Ubah/buka/tutup tujuan.                                        |
-| `/api/savings/[id]/movements`              | POST          | Kontribusi/penarikan.                                          |
-| `/api/savings/[id]/movements/[movementId]` | DELETE        | Hapus pergerakan.                                              |
-| `/api/recurring`                           | GET, POST     | Daftar/buat aturan rutin (sekaligus generate jadwal).          |
-| `/api/recurring/[id]`                      | PATCH         | Aktif/nonaktif aturan.                                         |
-| `/api/recurring/occurrences/[id]`          | PATCH         | `{ "action": "post" }` atau `{ "action": "skip" }`.            |
-| `/api/notifications`                       | GET           | Daftar notifikasi + sinkronisasi pengingat.                    |
-| `/api/notifications/[id]`                  | PATCH         | Tandai satu notifikasi dibaca.                                 |
-| `/api/notifications/read-all`              | POST          | Tandai semua dibaca.                                           |
-| `/api/insights`                            | GET           | Insight bulan berjalan.                                        |
-| `/api/reports`                             | GET           | `?period=DAILY, WEEKLY, MONTHLY, YEARLY&date=YYYY-MM-DD`.      |
-| `/api/reports/export`                      | GET           | Export laporan: `?format=csv, pdf, xlsx, excel` (default CSV). |
-| `/api/backup`                              | GET, POST     | Unduh JSON backup; `POST` restore.                             |
-
-Semua endpoint (kecuali auth publik) memerlukan session. Endpoint API mengembalikan `401` jika belum login, dan memeriksa kepemilikan data per user.
 
 ## Aturan Data dan Ledger
 
