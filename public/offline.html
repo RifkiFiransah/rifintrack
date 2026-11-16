@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>Offline · RiFinTrack</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f4f7f6;
+        --surface: #ffffff;
+        --border: #dce6e2;
+        --text: #10201d;
+        --muted: #53665f;
+        --brand: #0f766e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #07110f;
+          --surface: #0d1a17;
+          --border: #223a34;
+          --text: #e6f1ee;
+          --muted: #9bb3ad;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        width: 100%;
+        max-width: 420px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--surface);
+        padding: 28px;
+        box-shadow: 0 18px 36px -28px rgb(16 32 29 / 0.35);
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--brand);
+        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 18px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 20px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        background: var(--brand);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark" aria-hidden="true">R</span>
+      <h1>Kamu sedang offline</h1>
+      <p>
+        Halaman ini tidak tersedia tanpa koneksi internet. Transaksi yang kamu
+        catat akan disimpan di perangkat dan dikirim otomatis saat online.
+      </p>
+      <a href="/dashboard">Coba lagi</a>
+    </main>
+  </body>
+</html>

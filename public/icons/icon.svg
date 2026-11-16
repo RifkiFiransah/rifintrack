@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="RiFinTrack">
+  <rect width="512" height="512" rx="112" fill="#0f766e"/>
+  <path d="M136 344V168h104c50 0 84 30 84 74 0 32-16 56-44 66l56 36h-56l-48-32h-52v32h-44Zm44-72h56c26 0 42-12 42-34s-16-34-42-34h-56v68Z" fill="#ffffff"/>
+  <rect x="332" y="300" width="44" height="44" rx="10" fill="#fbbf24"/>
+</svg>
