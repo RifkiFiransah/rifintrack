@@ -182,41 +182,6 @@ Jangan commit file `.env`. File tersebut sudah ada di `.gitignore`.
 | `npm run db:validate` | Validasi schema Prisma.                        |
 | `npm run db:format`   | Rapikan format schema Prisma.                  |
 
-## Struktur Proyek
-
-```text
-prisma/
-  schema.prisma          # 17 model, enum, relasi, unique constraint
-  migrations/            # riwayat migrasi SQL
-  seed.ts                # data development idempotent
-public/
-  manifest.json          # manifest PWA
-  icons/icon.svg
-  sw.js                  # service worker (cache aset + fallback offline)
-  offline.html           # halaman fallback saat offline
-src/
-  app/
-    (dashboard)/         # halaman terproteksi + layout sidebar/bottom nav
-    api/                 # route handlers (JSON API)
-    login/, register/    # halaman autentikasi
-    layout.tsx           # root layout + PWA register
-  components/
-    ui/                  # button, input, select, badge, stat-card
-    charts/              # chart SVG/HTML tanpa library chart
-    layout/              # sidebar dan bottom navigation
-  features/              # client components per domain
-  lib/                   # auth, prisma, validation, money, offline queue
-  services/              # business logic + query Prisma
-  proxy.ts               # proteksi route (Next.js 16)
-```
-
-Alur data:
-
-1. Halaman server (`app/(dashboard)`) mengambil session dan memanggil `src/services/*`.
-2. Service memvalidasi kepemilikan data, mengelola BigInt/ledger, lalu mengembalikan view yang aman untuk RSC.
-3. Form interaktif (`src/features/*`) memanggil route handler `/api/*`.
-4. Route handler memakai Zod + service yang sama, sehingga aturan bisnis konsisten.
-
 ## Halaman
 
 | Route            | Fungsi                                                                                        |
@@ -315,48 +280,6 @@ Semua endpoint (kecuali auth publik) memerlukan session. Endpoint API mengembali
 npm run build
 npm run start
 ```
-
-### Vercel + Supabase
-
-Stack produksi: GitHub → Vercel → Supabase PostgreSQL. Panduan lengkap ada di [`DEPLOYMENT.md`](DEPLOYMENT.md), mencakup setup Supabase, environment variable, migrasi, deploy, smoke test, backup, dan rollback.
-
-Ringkasan:
-
-1. Buat project Supabase dan ambil `DATABASE_URL` (pooler) serta `DIRECT_URL` (direct/session pooler).
-2. Set environment variable tersebut di Vercel.
-3. Jalankan migrasi produksi dari mesin/CI tepercaya: `npm run db:deploy`.
-4. Deploy dari GitHub. `postinstall` menjalankan `prisma generate` otomatis.
-5. Jangan menjalankan seed development di produksi.
-6. Gunakan HTTPS agar cookie session `Secure` bekerja.
-
-Catatan: cookie session memakai `Secure` saat `NODE_ENV=production`. Login lewat `http://` (selain localhost) tidak akan menyimpan cookie.
-
-## Troubleshooting
-
-| Masalah                                                            | Penyebab umum                                            | Solusi                                                                                                                                               |
-| ------------------------------------------------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `P1001: Can't reach database server`                               | Database belum jalan atau URL salah.                     | `docker start rifintrack-pg`, cek `pg_isready`, cocokkan host/port/user/password.                                                                    |
-| Prisma CLI error padahal `.env` benar                              | `DIRECT_URL` belum diisi.                                | Isi `DIRECT_URL` (schema memakai `directUrl`).                                                                                                       |
-| `prisma generate` gagal: `EPERM ... query_engine-windows.dll.node` | Dev server/Node masih memegang Prisma engine.            | Hentikan `npm run dev`/proses Node proyek, lalu jalankan ulang `npm run db:generate`.                                                                |
-| Seed gagal: `SEED_USER_EMAIL and SEED_USER_PASSWORD are required`  | Variabel seed kosong.                                    | Isi keduanya di `.env`, lalu `npm run db:seed`.                                                                                                      |
-| Login berhasil di dev, gagal setelah `next start`                  | Cookie `Secure` dikirim lewat HTTP.                      | Gunakan HTTPS, atau uji dengan `npm run dev`.                                                                                                        |
-| User seed tidak bisa login                                         | Password masih placeholder atau seed belum jalan.        | Set password baru di `.env`, jalankan `npm run db:seed` (seed tidak mengubah password user yang sudah ada; gunakan email baru atau reset DB).        |
-| Error native `@node-rs/argon2`                                     | Platform/arsitektur tidak cocok.                         | Hapus `node_modules` + `package-lock.json`, install ulang di platform yang didukung. Jangan ganti ke paket `argon2` native karena butuh build tools. |
-| Port 3000 dipakai                                                  | Proses lain masih berjalan.                              | Hentikan proses tersebut atau `npm run dev -- -p 3001`.                                                                                              |
-| Ingin reset database development                                   | Data lama mengganggu.                                    | `npx prisma migrate reset` (menghapus semua data), lalu `npm run db:seed`.                                                                           |
-| Notifikasi kosong                                                  | Notifikasi dibuat saat halaman/API notifikasi diakses.   | Buka `/notifications` atau panggil `GET /api/notifications`.                                                                                         |
-| Transaksi offline tidak sinkron                                    | Berbeda browser/akun, session habis, atau masih offline. | Login di browser yang sama, pastikan online, gunakan tombol "Sinkronkan sekarang".                                                                   |
-| Tombol Posting transaksi rutin nonaktif                            | Jadwal belum jatuh tempo atau aturan nonaktif.           | Tunggu tanggal jadwal atau aktifkan aturan.                                                                                                          |
-
-## Keamanan
-
-- Jangan commit `.env` atau file backup.
-- Gunakan password database dan `SEED_USER_PASSWORD` yang kuat.
-- Session disimpan sebagai hash SHA-256 di database; cookie `httpOnly`, `sameSite=lax`, berlaku 30 hari, dan `Secure` di produksi.
-- Semua query data pengguna memeriksa `userId`; akses lintas user menghasilkan `404`.
-- Ganti password mencabut sesi aktif lain, tetapi mempertahankan sesi perangkat saat ini.
-- Restore backup bersifat destruktif dan meminta konfirmasi di UI.
-- Rate limiting in-memory tersedia untuk login, register, dan ganti password. Verifikasi email, reset password, dan rate limiting terdistribusi belum tersedia.
 
 ## Contributing
 
